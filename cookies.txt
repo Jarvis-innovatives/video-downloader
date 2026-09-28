@@ -1,0 +1,2 @@
+# Netscape HTTP Cookie File
+# This file is loaded automatically by yt-dlp if present

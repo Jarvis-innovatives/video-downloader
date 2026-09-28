@@ -31,6 +31,39 @@ def get_ffmpeg_path():
         return None
 
 
+def get_base_ydl_opts():
+    """Returns resilient yt-dlp options bypassing YouTube bot detection and IP challenges."""
+    browser_headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Mode': 'navigate',
+    }
+
+    opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'nocheckcertificate': True,
+        'http_headers': browser_headers,
+        # iOS / Web player client fallback chain to bypass bot check
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['ios', 'android', 'web', 'mweb'],
+                'skip': ['hls', 'dash']
+            }
+        },
+        'geo_bypass': True,
+        'ignoreerrors': False,
+    }
+
+    # Use cookies file if present
+    cookie_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
+    if os.path.exists(cookie_file):
+        opts['cookiefile'] = cookie_file
+
+    return opts
+
+
 def detect_platform(url: str) -> str | None:
     """Detects social/media platform from URL."""
     u = url.lower().strip()
@@ -129,12 +162,11 @@ def fetch_moviebox_metadata(url: str):
         if clean_search_title and clean_search_title.lower() != 'moviebox full movie':
             try:
                 ffmpeg_path = get_ffmpeg_path()
-                ydl_opts = {
-                    'quiet': True,
-                    'no_warnings': True,
+                ydl_opts = get_base_ydl_opts()
+                ydl_opts.update({
                     'extract_flat': False,
                     'http_headers': headers,
-                }
+                })
                 if ffmpeg_path:
                     ydl_opts['ffmpeg_location'] = ffmpeg_path
 
@@ -338,12 +370,11 @@ def fetch_multiple_moviebox_results(query: str, limit=8):
     # 2. Extract results via yt_dlp multi-search for full feature movie streams
     ffmpeg_path = get_ffmpeg_path()
     search_term = f"ytsearch{limit}:{clean_query} full movie"
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
+    ydl_opts = get_base_ydl_opts()
+    ydl_opts.update({
         'extract_flat': False,
         'http_headers': headers,
-    }
+    })
     if ffmpeg_path:
         ydl_opts['ffmpeg_location'] = ffmpeg_path
 
@@ -484,12 +515,11 @@ def api_fetch(request):
             return JsonResponse({'error': f'Could not fetch MovieBox content: {str(e)[:120]}'}, status=400)
 
     # Handle YouTube, Instagram, TikTok via yt-dlp
-    ydl_opts = {
+    ydl_opts = get_base_ydl_opts()
+    ydl_opts.update({
         'skip_download': True,
-        'quiet': True,
-        'no_warnings': True,
         'extract_flat': False,
-    }
+    })
     ffmpeg_path = get_ffmpeg_path()
     if ffmpeg_path:
         ydl_opts['ffmpeg_location'] = ffmpeg_path
@@ -659,17 +689,15 @@ def run_download_task(task_id, download_data):
         if m:
             preferred_kbps = m.group(0)
 
-        ydl_opts = {
+        ydl_opts = get_base_ydl_opts()
+        ydl_opts.update({
             'format': 'bestaudio/best',
             'outtmpl': out_template,
-            'quiet': True,
-            'no_warnings': True,
             'http_headers': browser_headers,
-            'nocheckcertificate': True,
             'retries': 10,
             'fragment_retries': 10,
             'progress_hooks': [progress_hook],
-        }
+        })
         if ffmpeg_path:
             ydl_opts['ffmpeg_location'] = ffmpeg_path
             ydl_opts['postprocessors'] = [{
@@ -684,32 +712,28 @@ def run_download_task(task_id, download_data):
             target_height = int(m.group(0))
 
         if ffmpeg_path:
-            ydl_opts = {
+            ydl_opts = get_base_ydl_opts()
+            ydl_opts.update({
                 'format': f'bestvideo[height<={target_height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best',
                 'merge_output_format': 'mp4',
                 'outtmpl': out_template,
-                'quiet': True,
-                'no_warnings': True,
                 'ffmpeg_location': ffmpeg_path,
                 'http_headers': browser_headers,
-                'nocheckcertificate': True,
                 'retries': 10,
                 'fragment_retries': 10,
                 'hls_use_mpegts': True,
                 'progress_hooks': [progress_hook],
-            }
+            })
         else:
-            ydl_opts = {
+            ydl_opts = get_base_ydl_opts()
+            ydl_opts.update({
                 'format': f'best[height<={target_height}][ext=mp4]/best[ext=mp4]/best',
                 'outtmpl': out_template,
-                'quiet': True,
-                'no_warnings': True,
                 'http_headers': browser_headers,
-                'nocheckcertificate': True,
                 'retries': 10,
                 'fragment_retries': 10,
                 'progress_hooks': [progress_hook],
-            }
+            })
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -974,16 +998,14 @@ def api_download(request):
         if m:
             preferred_kbps = m.group(0)
 
-        ydl_opts = {
+        ydl_opts = get_base_ydl_opts()
+        ydl_opts.update({
             'format': 'bestaudio/best',
             'outtmpl': out_template,
-            'quiet': True,
-            'no_warnings': True,
             'http_headers': browser_headers,
-            'nocheckcertificate': True,
             'retries': 10,
             'fragment_retries': 10,
-        }
+        })
         if ffmpeg_path:
             ydl_opts['ffmpeg_location'] = ffmpeg_path
             ydl_opts['postprocessors'] = [{
@@ -998,30 +1020,26 @@ def api_download(request):
             target_height = int(m.group(0))
 
         if ffmpeg_path:
-            ydl_opts = {
+            ydl_opts = get_base_ydl_opts()
+            ydl_opts.update({
                 'format': f'bestvideo[height<={target_height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best',
                 'merge_output_format': 'mp4',
                 'outtmpl': out_template,
-                'quiet': True,
-                'no_warnings': True,
                 'ffmpeg_location': ffmpeg_path,
                 'http_headers': browser_headers,
-                'nocheckcertificate': True,
                 'retries': 10,
                 'fragment_retries': 10,
                 'hls_use_mpegts': True,
-            }
+            })
         else:
-            ydl_opts = {
+            ydl_opts = get_base_ydl_opts()
+            ydl_opts.update({
                 'format': f'best[height<={target_height}][ext=mp4]/best[ext=mp4]/best',
                 'outtmpl': out_template,
-                'quiet': True,
-                'no_warnings': True,
                 'http_headers': browser_headers,
-                'nocheckcertificate': True,
                 'retries': 10,
                 'fragment_retries': 10,
-            }
+            })
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
