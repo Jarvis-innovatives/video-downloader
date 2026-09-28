@@ -45,6 +45,7 @@ def get_base_ydl_opts():
         'no_warnings': True,
         'nocheckcertificate': True,
         'http_headers': browser_headers,
+        'cookiesfrombrowser': None,
         'extractor_args': {
             'youtube': {
                 'player_client': ['tv', 'mweb', 'ios', 'android'],
@@ -55,15 +56,7 @@ def get_base_ydl_opts():
         'ignoreerrors': False,
     }
 
-    # 1. Try local browsers (Chrome, Edge, Firefox, Brave) cookies automatically
-    for browser_name in ['chrome', 'edge', 'firefox', 'brave', 'opera']:
-        try:
-            opts['cookiesfrombrowser'] = (browser_name,)
-            break
-        except Exception:
-            pass
-
-    # 2. Use cookies.txt file if present
+    # Use cookies.txt file if present and valid
     cookie_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
     if os.path.exists(cookie_file) and os.path.getsize(cookie_file) > 50:
         opts['cookiefile'] = cookie_file
