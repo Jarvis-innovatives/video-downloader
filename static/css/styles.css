@@ -1,0 +1,1031 @@
+/* SnapGrab Dark Theme Design System */
+
+:root {
+  --radius: 0.875rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --background: #111217;
+  --foreground: #f2f3f7;
+  --card: #1a1c24;
+  --card-foreground: #f2f3f7;
+  --popover: #1a1c24;
+  --popover-foreground: #f2f3f7;
+
+  --primary: #f97316;
+  --primary-foreground: #0e1015;
+
+  --secondary: #242633;
+  --secondary-foreground: #f2f3f7;
+
+  --muted: #242633;
+  --muted-foreground: #9ca3af;
+
+  --accent: #2e3142;
+  --accent-foreground: #f2f3f7;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fef2f2;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #59524d;
+  --glow: rgba(249, 115, 22, 0.35);
+
+  --font-display: 'Clash Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-slab: 'Roboto Slab', 'Arvo', Georgia, 'Times New Roman', serif;
+}
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-slab);
+  font-size: 12px; /* minimum base font size across the site */
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Glow Utilities */
+.text-glow {
+  text-shadow: 0 0 32px var(--glow);
+}
+
+.card-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 24px 64px -24px rgba(0, 0, 0, 0.6),
+    0 0 80px -40px var(--glow);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Platform Specific Badge Styling */
+.platform-youtube {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.platform-instagram {
+  background-color: rgba(217, 70, 239, 0.15);
+  color: #f0abfc;
+  border-color: rgba(217, 70, 239, 0.3);
+}
+
+.platform-tiktok {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: #67e8f9;
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.platform-moviebox {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Layout Utilities matching original Tailwind */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.max-w-5xl {
+  max-width: 64rem;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.max-w-xl {
+  max-width: 36rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.hidden {
+  display: none;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.shrink-0 {
+  flex-shrink: 0;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-1\.5 {
+  gap: 0.375rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-2\.5 {
+  gap: 0.625rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.p-1 {
+  padding: 0.25rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-5 {
+  padding: 1.25rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.px-2\.5 {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.px-7 {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.py-3\.5 {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.py-14 {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.pt-14 {
+  padding-top: 3.5rem;
+}
+
+.pb-10 {
+  padding-bottom: 2.5rem;
+}
+
+.pb-16 {
+  padding-bottom: 4rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-1\.5 {
+  margin-top: 0.375rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-2\.5 {
+  margin-top: 0.625rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-5 {
+  margin-top: 1.25rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-xs {
+  font-size: 12px; /* ensure at least 12px */
+  line-height: 1.25rem;
+}
+
+.text-sm {
+  font-size: 13px;
+  line-height: 1.3rem;
+}
+
+.text-base {
+  font-size: 14px;
+  line-height: 1.6rem;
+}
+
+.text-lg {
+  font-size: 16px;
+  line-height: 1.75rem;
+}
+
+.text-xl {
+  font-size: 18px;
+  line-height: 1.75rem;
+}
+
+.text-3xl {
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.text-4xl {
+  font-size: 36px;
+  line-height: 1.1;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+.border-t {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.border-y {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-style: solid;
+}
+
+.bg-background {
+  background-color: var(--background);
+}
+
+.bg-card {
+  background-color: var(--card);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-primary\/10 {
+  background-color: rgba(249, 115, 22, 0.1);
+}
+
+.bg-primary\/12 {
+  background-color: rgba(249, 115, 22, 0.12);
+}
+
+.bg-primary\/15 {
+  background-color: rgba(249, 115, 22, 0.15);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.text-primary-foreground {
+  color: var(--primary-foreground);
+}
+
+.text-secondary-foreground {
+  color: var(--secondary-foreground);
+}
+
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+.text-destructive {
+  color: var(--destructive);
+}
+
+.opacity-60 {
+  opacity: 0.6;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.outline-none {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+/* Responsive Media Queries */
+@media (min-width: 640px) {
+  .sm\:flex {
+    display: flex;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-\[1\.1fr_1fr\] {
+    grid-template-columns: 1.1fr 1fr;
+  }
+
+  .sm\:items-center {
+    align-items: center;
+  }
+
+  .sm\:text-base {
+    font-size: 1rem;
+  }
+
+  .sm\:text-lg {
+    font-size: 1.125rem;
+  }
+
+  .sm\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  .sm\:pt-20 {
+    padding-top: 5rem;
+  }
+
+  .sm\:p-6 {
+    padding: 1.5rem;
+  }
+}
+
+/* Hover & Focus Interactions */
+button,
+a {
+  transition: all 0.15s ease-in-out;
+}
+
+button:hover,
+a:hover {
+  opacity: 0.95;
+}
+
+.hover\:brightness-110:hover {
+  filter: brightness(1.1);
+}
+
+.hover\:bg-accent:hover {
+  background-color: var(--accent);
+}
+
+.hover\:border-input:hover {
+  border-color: var(--input);
+}
+
+/* Three.js canvas styling */
+.three-canvas {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
+  pointer-events: none;
+}
+
+/* CTA: orange text on grey background */
+.download-cta {
+  background-color: #6b6b6b !important;
+  color: var(--primary) !important;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.download-cta:hover {
+  filter: brightness(0.95);
+}
+
+/* Orange box: orange background with black bold text */
+.orange-box {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  font-weight: 700 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.orange-box:hover {
+  filter: brightness(0.98);
+}
+
+/* Global button box styling: rounded corners, glowing white border, remove underlines */
+button,
+a[class*="rounded"],
+input[type="button"],
+input[type="submit"] {
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.06), 0 0 18px rgba(255, 255, 255, 0.12) !important;
+  -webkit-font-smoothing: antialiased;
+  text-decoration: none !important;
+  background-clip: padding-box;
+}
+
+/* Ensure anchor-buttons don't show underlines and have bold text color preserved */
+a[class*="rounded"] {
+  text-decoration: none !important;
+  text-decoration-color: transparent !important;
+  color: inherit !important;
+  font-weight: 700 !important;
+}
+
+/* Remove underline for any links styled as buttons */
+button,
+a,
+input[type="button"],
+input[type="submit"] {
+  text-decoration: none !important;
+}
+
+/* Times New Roman class for specific hero/platform text */
+.times-font {
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+/* Movies page: use the project's `static/images/background.png` as the full-cover background */
+.movies-background {
+  background-image: url('/static/images/background.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #000; /* fallback color while image loads */
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(225, 245, 255, 0.06), rgba(220, 235, 255, 0.03));
+  border: 1px solid rgba(200, 230, 255, 0.12);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  box-shadow: 0 8px 30px rgba(30, 100, 160, 0.12);
+}
+
+.movies-box {
+  background: linear-gradient(180deg, rgba(187,233,255,0.12), rgba(146,196,255,0.08));
+  color: #dbdfe3 !important;
+  border-color: rgba(180, 220, 255, 0.18) !important;
+  box-shadow: 0 8px 24px rgba(60,150,220,0.06) !important;
+}
+
+.movie-item {
+  display: block;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(200, 230, 255, 0.06);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.movie-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(30,100,160,0.12);
+}
+
+.movie-thumb {
+  width: 100%;
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+}
+
+/* Movies title and centered search box */
+.movies-title {
+  margin-top: 3rem;
+  color: #eeeaea;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.movie-search-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.movie-search-box {
+  width: 80%;
+  max-width: 900px;
+  background: #f9f8f8;
+  border-radius: 14px;
+  border: 2px solid #e6dfca; /* classic light border */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  padding: 14px 18px;
+  margin-top: 250px;
+  position: relative;
+  margin-left:-150px;
+}
+
+.movie-search-box {
+  display: flex;
+  align-items: center;
+}
+
+.movie-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 12px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+}
+
+.movie-search-icon svg {
+  display: block;
+}
+
+.movie-search-input {
+  flex: 1 1 auto;
+  width: auto;
+  border: none;
+  outline: none;
+  font-size: 1.125rem;
+  color: #111827; /* dark text on white */
+  background: transparent;
+  height: 40px; /* keeps the box length > height */
+}
+
+.movie-search-input::placeholder {
+  color: #6b7280;
+}
+
+/* Fixed back-to-home link in top-left */
+.movies-back-link {
+  position: fixed;
+  top: 16px;
+  left: 18px;
+  z-index: 60;
+  background: #f97316;
+  color: #b2b5bb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.34);
+  margin-left: 230px;
+}
+
+.movies-back-link:hover {
+  transform: translateY(-1px);
+}
+
+/* How It Works cards: larger text, transparent orange background, glowing white border */
+#how .grid > div {
+  background-color: rgba(249, 115, 22, 0.08) !important; /* subtle transparent orange */
+  border: 1px solid rgba(255, 255, 255, 0.9) !important; /* bright white border for glow */
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.06), 0 0 32px rgba(255, 255, 255, 0.12) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+#how .grid > div h3 {
+  font-size: 1.25rem; /* slightly larger heading */
+  line-height: 1.4;
+}
+
+#how .grid > div p {
+  font-size: 1rem; /* larger body text */
+  color: var(--foreground);
+  opacity: 0.9;
+}
+
+#how .grid > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(255, 255, 255, 0.06), 0 0 48px rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Ensure anchor-buttons don't show underlines and have bold text color preserved */
+a[class*="rounded"] {
+  text-decoration: none !important;
+  text-decoration-color: transparent !important;
+  color: inherit !important;
+  font-weight: 700 !important;
+}
+
+/* Remove underline for any links styled as buttons */
+button,
+a,
+input[type="button"],
+input[type="submit"] {
+  text-decoration: none !important;
+}
+
+/* Times New Roman class for specific hero/platform text */
+.times-font {
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+/* MovieBox Real Movie Card Styling */
+.movie-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.moviebox-card {
+  position: relative;
+  background: rgba(26, 28, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.moviebox-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(249, 115, 22, 0.25);
+}
+
+.moviebox-poster-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #000;
+}
+
+.moviebox-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.moviebox-card:hover .moviebox-poster-img {
+  transform: scale(1.06);
+}
+
+.moviebox-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.moviebox-card:hover .moviebox-overlay {
+  opacity: 1;
+}
+
+.moviebox-zoom-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(249, 115, 22, 0.9);
+  color: #0e1015;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.6);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+}
+
+.moviebox-card:hover .moviebox-zoom-icon {
+  transform: scale(1.08);
+}
+
+.moviebox-card-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.moviebox-card-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f2f3f7;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.moviebox-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: auto;
+}
+
+.moviebox-badge {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color:white;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}

@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enhance Image{% endblock %}
+
+{% block content %}
+<div class="enhance-image-page">
+  <div class="enhance-image-overlay"></div>
+
+  <header class="enhance-image-header">
+    <a href="{% url 'downloader:index' %}" class="enhance-image-back">Back</a>
+  </header>
+
+  <main class="enhance-image-content">
+    <div class="enhance-image-card">
+      <p class="enhance-image-label">Enhance Image</p>
+      <h1>Bring your image to life.</h1>
+      <p>Upload or choose a reference image to improve quality, sharpness, and detail in a dedicated enhancement workspace.</p>
+
+      <div class="enhance-upload-box">
+        <label for="imageUpload" class="enhance-upload-label">Upload Image</label>
+        <input id="imageUpload" type="file" accept="image/*" />
+      </div>
+
+      <div id="enhanceWorkspace" class="enhance-workspace hidden">
+        <div class="enhance-preview-panel">
+          <img id="selectedImagePreview" src="" alt="Selected preview" />
+        </div>
+
+        <div class="enhance-controls-panel">
+          <h2>Choose quality</h2>
+          <div class="quality-options">
+            <button class="quality-btn active" type="button" data-quality="hd">HD</button>
+            <button class="quality-btn" type="button" data-quality="ultra-hd">Ultra HD</button>
+          </div>
+
+          <div id="dimStatus" class="dim-status hidden">
+            <span id="origDim">Original</span> &rarr; <span id="enhDim" class="highlight-dim">Enhanced</span>
+          </div>
+
+          <button id="downloadImageBtn" type="button" class="download-image-btn">Enhance & Download</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .enhance-image-page {
+    position: relative;
+    min-height: 100vh;
+    background-image: url("{% static 'images/imager.png' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .enhance-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 12, 18, 0.58);
+    backdrop-filter: blur(2px);
+  }
+
+  .enhance-image-header,
+  .enhance-image-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .enhance-image-header {
+    display: flex;
+    justify-content: flex-start;
+    padding: 1.5rem 2rem;
+  }
+
+  .enhance-image-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1.1rem;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: #f97316;
+    color: #0e1015;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
+  }
+
+  .enhance-image-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 2rem;
+  }
+
+  .enhance-image-card {
+    max-width: 600px;
+    padding: 2rem 2.2rem;
+    border-radius: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: rgba(17, 18, 23, 0.6);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
+    text-align: left;
+  }
+
+  .enhance-image-label {
+    display: inline-block;
+    margin-bottom: 0.9rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(249, 115, 22, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .enhance-image-card h1 {
+    margin-bottom: 0.8rem;
+    font-size: clamp(2.25rem, 4vw, 4rem);
+    line-height: 1.05;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  .enhance-image-card p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .enhance-upload-box {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border: 1px dashed rgba(255, 255, 255, 0.8);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .enhance-upload-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .enhance-upload-box input[type="file"] {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(17, 18, 23, 0.7);
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .enhance-workspace {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1.25rem;
+    margin-top: 1.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .enhance-preview-panel {
+    min-height: 220px;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .enhance-preview-panel img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 320px;
+    object-fit: cover;
+  }
+
+  .enhance-controls-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: rgba(17, 18, 23, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .enhance-controls-panel h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+
+  .quality-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .quality-btn {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    padding: 0.75rem 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .quality-btn.active {
+    background: #f97316;
+    border-color: rgba(255, 255, 255, 0.9);
+    color: #0e1015;
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.28);
+  }
+
+  .dim-status {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .highlight-dim {
+    color: #f97316;
+    font-weight: 700;
+  }
+
+  .download-image-btn {
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: #f97316;
+    color: #0e1015;
+    border-radius: 0.85rem;
+    padding: 0.9rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease;
+  }
+
+  .download-image-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+  }
+
+  @media (max-width: 640px) {
+    .enhance-workspace {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const imageUpload = document.getElementById('imageUpload');
+  const enhanceWorkspace = document.getElementById('enhanceWorkspace');
+  const selectedImagePreview = document.getElementById('selectedImagePreview');
+  const qualityButtons = document.querySelectorAll('.quality-btn');
+  const downloadImageBtn = document.getElementById('downloadImageBtn');
+
+  const dimStatus = document.getElementById('dimStatus');
+  const origDim = document.getElementById('origDim');
+  const enhDim = document.getElementById('enhDim');
+
+  let currentImageFile = null;
+  let selectedQuality = 'hd';
+
+  imageUpload.addEventListener('change', function (event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    currentImageFile = file;
+    const objectUrl = URL.createObjectURL(file);
+    selectedImagePreview.src = objectUrl;
+    enhanceWorkspace.classList.remove('hidden');
+    dimStatus.classList.add('hidden');
+  });
+
+  qualityButtons.forEach((button) => {
+    button.addEventListener('click', function () {
+      selectedQuality = this.dataset.quality;
+      qualityButtons.forEach((btn) => btn.classList.toggle('active', btn === this));
+    });
+  });
+
+  downloadImageBtn.addEventListener('click', async function () {
+    if (!currentImageFile) return;
+
+    downloadImageBtn.disabled = true;
+    downloadImageBtn.textContent = 'Processing Backend Enhancement…';
+
+    try {
+      const formData = new FormData();
+      formData.append('image', currentImageFile);
+      formData.append('quality', selectedQuality);
+
+      const response = await fetch('/api/enhance_image/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.error || 'Failed to enhance image.');
+        downloadImageBtn.disabled = false;
+        downloadImageBtn.textContent = 'Enhance & Download';
+        return;
+      }
+
+      // Display updated dimensions
+      origDim.textContent = data.original_dimensions;
+      enhDim.textContent = `${data.enhanced_dimensions} (${data.quality_label})`;
+      dimStatus.classList.remove('hidden');
+
+      // Update preview to enhanced image
+      selectedImagePreview.src = data.image_data_url;
+
+      // Trigger file download
+      const link = document.createElement('a');
+      link.href = data.image_data_url;
+      link.download = `Enhanced_${selectedQuality.toUpperCase()}_${currentImageFile.name.replace(/\.[^/.]+$/, '')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      downloadImageBtn.disabled = false;
+      downloadImageBtn.textContent = 'Enhance & Download Again';
+
+    } catch (err) {
+      console.error(err);
+      alert('Network or backend server error.');
+      downloadImageBtn.disabled = false;
+      downloadImageBtn.textContent = 'Enhance & Download';
+    }
+  });
+</script>
+{% endblock %}

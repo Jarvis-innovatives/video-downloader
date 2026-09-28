@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-background text-foreground">
+  <!-- Ambient background glow -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0"
+    style="background: radial-gradient(60% 45% at 50% 0%, rgba(249, 115, 22, 0.14) 0%, transparent 70%);"></div>
+
+  <!-- Header -->
+  <header class="relative z-10 mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+    <div class="flex items-center gap-2.5">
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+      </div>
+      <span class="font-display text-xl font-bold tracking-tight">SnapGrab</span>
+    </div>
+    <nav class="hidden items-center gap-3 text-sm text-muted-foreground sm:flex">
+      <a href="#how"
+        class="rounded-lg bg-secondary px-4 py-2 font-medium text-secondary-foreground transition-colors hover:bg-accent download-cta orange-box">How
+        it works</a>
+      <a href="{% url 'downloader:movies' %}"
+        class="rounded-lg bg-secondary px-4 py-2 font-medium text-secondary-foreground transition-colors hover:bg-accent movies-box">Movies</a>
+      <a href="#platforms"
+        class="rounded-lg bg-secondary px-4 py-2 font-medium text-secondary-foreground transition-colors hover:bg-accent download-cta orange-box">Platforms</a>
+      <a href="#fetch"
+        class="rounded-lg bg-secondary px-4 py-2 font-medium text-secondary-foreground transition-colors hover:bg-accent download-cta orange-box">Start
+        downloading</a>
+      <a href="{% url 'downloader:enhance_image' %}"
+        class="inline-flex items-center justify-center gap-2 rounded-lg border border-white bg-primary px-4 py-2 font-display text-sm font-bold text-primary-foreground shadow-[0_0_18px_rgba(255,255,255,0.12)] transition-all hover:brightness-110">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18"></path>
+          <path d="M3 12h18"></path>
+          <path d="M5.5 5.5l13 13"></path>
+          <path d="M18.5 5.5l-13 13"></path>
+        </svg>
+        <span>Enhance Image</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="relative z-10">
+    <!-- Hero + URL Input -->
+    <section id="fetch" class="relative mx-auto max-w-3xl overflow-visible px-6 pt-14 pb-10 text-center sm:pt-20">
+      <div
+        class="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground times-font">
+        <svg class="text-primary" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        YouTube · Instagram · TikTok · MovieBox — video & MP3
+      </div>
+
+      <h1 class="font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-6xl times-font">
+        Grab any video.
+        <br>
+        <span class="text-foreground times-font">Keep it forever.</span>
+      </h1>
+
+      <p class="mx-auto mt-5 max-w-xl text-base text-foreground font-bold sm:text-lg times-font">
+        Paste a link, preview the media, pick your format and quality — up to 4K video or 320 kbps audio. No sign-up, no
+        fuss.
+      </p>
+
+      <!-- URL Input Box -->
+      <div class="mx-auto mt-10 max-w-2xl">
+        <div
+          class="card-glow flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 sm:flex-row sm:items-center">
+          <div class="flex flex-1 items-center gap-3 rounded-xl bg-background px-4 py-3.5">
+            <svg class="shrink-0 text-muted-foreground" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <input id="urlInput" type="text" placeholder="Paste a YouTube, Instagram, TikTok, or MovieBox link…"
+              class="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground sm:text-base"
+              style="width: 100%; background: transparent; border: none; color: inherit; font-size: 1rem; outline: none;" />
+            <button id="pasteBtn" type="button"
+              class="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              title="Paste from clipboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+          </div>
+
+          <button id="fetchBtn" type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 font-display text-sm font-bold text-primary-foreground transition-all hover:brightness-110">
+            <span id="fetchIcon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </span>
+            <span id="fetchBtnText">Fetch</span>
+          </button>
+        </div>
+        <p id="errorMsg" class="hidden mt-3 text-sm text-destructive"></p>
+      </div>
+    </section>
+
+    <!-- Result Card -->
+    <section id="resultSection" class="hidden mx-auto max-w-3xl scroll-mt-8 px-6 pb-16">
+      <div class="card-glow overflow-hidden rounded-2xl border border-border bg-card">
+        <div class="grid gap-0 sm:grid-cols-[1.1fr_1fr]">
+          <!-- Video Preview -->
+          <div class="relative" style="min-height: 240px; background: #000;">
+            <img id="thumbnailImg" src="{% static 'media/sample-thumb.jpg' %}" alt="Preview"
+              class="h-full w-full object-cover" style="width: 100%; height: 100%; object-fit: cover;">
+            <video id="videoPreview" class="hidden h-full w-full object-cover" loop playsinline
+              style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"></video>
+
+            <button id="playBtn" type="button" aria-label="Play preview"
+              class="absolute inset-0 flex items-center justify-center"
+              style="border: none; background: transparent; width: 100%; height: 100%;">
+              <div
+                class="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm transition-transform hover:scale-105"
+                style="width: 3.5rem; height: 3.5rem; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="ml-0.5 text-white">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+            </button>
+            <span id="durationBadge"
+              class="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-xs font-semibold text-white">12:48</span>
+          </div>
+
+          <!-- Video Details & Options -->
+          <div class="flex flex-col gap-4 p-5 sm:p-6">
+            <div>
+              <span id="platformBadge"
+                class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold platform-youtube">
+                YouTube
+              </span>
+              <h3 id="videoTitle" class="mt-2.5 font-display text-base font-bold leading-snug">
+                Chasing the Golden Hour — Cliffside Drone Journey in 4K
+              </h3>
+              <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span id="videoChannel">Wanderframe Studios</span>
+                <span id="videoViews" class="inline-flex items-center gap-1">2.4M views</span>
+                <span id="videoDuration" class="inline-flex items-center gap-1">12:48</span>
+              </div>
+            </div>
+
+            <!-- Format Toggle -->
+            <div class="grid grid-cols-2 gap-1 rounded-xl bg-background p-1"
+              style="display: grid; grid-template-columns: 1fr 1fr;">
+              <button id="formatVideoBtn" type="button"
+                class="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold bg-primary text-primary-foreground">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                  <line x1="7" y1="2" x2="7" y2="22"></line>
+                  <line x1="17" y1="2" x2="17" y2="22"></line>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                </svg>
+                Video
+              </button>
+              <button id="formatMp3Btn" type="button"
+                class="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 18V5l12-2v13"></path>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+                MP3
+              </button>
+            </div>
+
+            <!-- Quality Selection -->
+            <div>
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Quality</p>
+              <div id="qualityOptions" class="flex flex-wrap gap-1.5">
+                <!-- Dynamically generated buttons -->
+              </div>
+            </div>
+
+            <!-- Download Button & States -->
+            <div id="actionArea" class="mt-auto flex flex-col gap-2.5">
+              <button id="downloadBtn" type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 font-display text-sm font-bold text-primary-foreground transition-all hover:brightness-110">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span id="downloadBtnText">Download Video · 1080p</span>
+              </button>
+
+              <div id="progressContainer" class="hidden mt-auto">
+                <div class="mb-2 flex items-center justify-between text-xs font-medium">
+                  <span id="progressLabel" class="text-muted-foreground">Preparing video…</span>
+                  <span id="progressPercent" class="text-primary">0%</span>
+                </div>
+                <div class="h-2.5 overflow-hidden rounded-full bg-background"
+                  style="height: 0.625rem; background: var(--secondary); border-radius: 9999px;">
+                  <div id="progressBar" class="h-full rounded-full bg-primary"
+                    style="width: 0%; height: 100%; transition: width 0.15s ease;"></div>
+                </div>
+              </div>
+
+              <div id="doneContainer" class="hidden mt-auto flex flex-col gap-2.5">
+                <div class="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
+                  <span
+                    class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">✓</span>
+                  <div class="text-sm">
+                    <p class="font-semibold">Download complete!</p>
+                    <p id="doneFileName" class="text-xs text-muted-foreground">video-1080p.mp4 saved to your device</p>
+                  </div>
+                </div>
+                <button id="resetBtn" type="button"
+                  class="rounded-xl bg-secondary px-5 py-3 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-accent">
+                  Download another video
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how" class="mx-auto max-w-5xl px-6 py-16">
+      <h2 class="text-center font-display text-3xl font-bold tracking-tight">Three steps. That's it.</h2>
+      <div class="mt-10 grid gap-4 sm:grid-cols-3">
+        <div class="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-input">
+          <div class="flex items-center justify-between">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </div>
+            <span class="font-display text-sm font-bold text-muted-foreground/60">01</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold">Paste the link</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">Copy a video URL from YouTube, Instagram, or
+            TikTok and drop it in the box.</p>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-input">
+          <div class="flex items-center justify-between">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <span class="font-display text-sm font-bold text-muted-foreground/60">02</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold">Preview & choose</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">See the thumbnail, title and duration, then
+            pick video or MP3 and your quality.</p>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-input">
+          <div class="flex items-center justify-between">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <span class="font-display text-sm font-bold text-muted-foreground/60">03</span>
+          </div>
+          <h3 class="mt-4 font-display text-lg font-bold">Download</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-muted-foreground">Hit download and your file is prepared and
+            saved straight to your device.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Platforms Strip -->
+    <section id="platforms" class="border-y border-border bg-card/50">
+      <div class="mx-auto grid max-w-5xl gap-8 px-6 py-14 sm:grid-cols-3">
+        <div>
+          <h3 class="font-display text-base font-bold">Supported platforms</h3>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold platform-youtube">YouTube</span>
+            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold platform-instagram">Instagram</span>
+            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold platform-tiktok">TikTok</span>
+            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold platform-moviebox">MovieBox</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-display text-base font-bold">Video up to 4K</h3>
+          <p class="mt-2 text-sm text-muted-foreground">240p, 360p, 480p, 720p, 1080p, 1440p, and 2160p/4K when the
+            source offers it.</p>
+        </div>
+        <div>
+          <h3 class="font-display text-base font-bold">Crisp MP3 audio</h3>
+          <p class="mt-2 text-sm text-muted-foreground">Extract audio at 128, 192, 256, or 320 kbps for music and
+            podcasts on the go.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Strip -->
+    <section
+      class="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-6 py-12 text-sm text-muted-foreground">
+      <span class="inline-flex items-center gap-2">
+        <svg class="text-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        No sign-up required
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <svg class="text-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        Fast processing
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <svg class="text-primary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Free to use
+      </span>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-border">
+    <div
+      class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-6 py-8 text-xs text-muted-foreground sm:flex-row">
+      <div class="flex items-center gap-2">
+        <div class="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+        </div>
+        <span class="font-display font-bold text-foreground">SnapGrab</span>
+      </div>
+      <p>Demo interface — for personal use. Respect creators' rights.</p>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
+<script src="{% static 'js/3d.js' %}"></script>
+{% endblock %}
+
+
+<h5> upload image</h5>
