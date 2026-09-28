@@ -56,10 +56,22 @@ def get_base_ydl_opts():
         'ignoreerrors': False,
     }
 
-    # Use cookies.txt file if present and valid
-    cookie_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
-    if os.path.exists(cookie_file) and os.path.getsize(cookie_file) > 50:
-        opts['cookiefile'] = cookie_file
+    # 1. Check for YOUTUBE_COOKIES or COOKIES_TXT environment variable (for Render hosting)
+    env_cookies = os.environ.get('YOUTUBE_COOKIES') or os.environ.get('COOKIES_TXT')
+    if env_cookies and len(env_cookies.strip()) > 50:
+        try:
+            env_cookie_path = os.path.join(tempfile.gettempdir(), 'render_youtube_cookies.txt')
+            with open(env_cookie_path, 'w', encoding='utf-8') as f:
+                f.write(env_cookies.strip())
+            opts['cookiefile'] = env_cookie_path
+        except Exception:
+            pass
+
+    # 2. Fallback to local cookies.txt file if present
+    if 'cookiefile' not in opts:
+        cookie_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
+        if os.path.exists(cookie_file) and os.path.getsize(cookie_file) > 50:
+            opts['cookiefile'] = cookie_file
 
     return opts
 
@@ -514,7 +526,57 @@ def api_fetch(request):
         except Exception as e:
             return JsonResponse({'error': f'Could not fetch MovieBox content: {str(e)[:120]}'}, status=400)
 
-    # Handle YouTube, Instagram, TikTok via yt-dlp
+    # Handle YouTube, Instagram, TikTok via yt-dlp & Cobalt/Invidious multi-tier fallback
+    info = None
+    last_exception = None
+
+    # Tier 1: Try Cobalt / Invidious public API bypass (bypasses YouTube bot check completely)
+    if platform == 'YouTube':
+        m_id = re.search(r'(?:v=|\/|youtu\.be\/)([a-zA-Z0-9_-]{11})', url)
+        video_id = m_id.group(1) if m_id else None
+
+        if video_id:
+            # 1a. Try Invidious API instances
+            invidious_instances = [
+                'https://inv.verified.human.kiwi',
+                'https://invidious.nerdvpn.de',
+                'https://invidious.flokinet.to',
+                'https://vid.puffyan.us',
+            ]
+            for inst in invidious_instances:
+                try:
+                    resp = requests.get(f"{inst}/api/v1/videos/{video_id}", timeout=4)
+                    if resp.status_code == 200:
+                        inv_data = resp.json()
+                        v_title = inv_data.get('title', 'YouTube Video')
+                        v_author = inv_data.get('author', 'YouTube Channel')
+                        v_dur = format_duration(inv_data.get('lengthSeconds'))
+                        v_views = format_views(inv_data.get('viewCount'))
+                        v_thumb = f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+
+                        # Extract format stream
+                        stream_url = f"https://www.youtube.com/watch?v={video_id}"
+                        format_streams = inv_data.get('formatStreams', [])
+                        if format_streams:
+                            stream_url = format_streams[-1].get('url', stream_url)
+
+                        return JsonResponse({
+                            'success': True,
+                            'platform': 'YouTube',
+                            'url': f"https://www.youtube.com/watch?v={video_id}",
+                            'title': v_title,
+                            'channel': v_author,
+                            'duration': v_dur,
+                            'views': v_views,
+                            'video_qualities': ALL_VIDEO_QUALITIES,
+                            'mp3_qualities': MP3_QUALITIES,
+                            'thumbnail_url': v_thumb,
+                            'preview_url': stream_url,
+                        })
+                except Exception:
+                    pass
+
+    # Tier 2: yt-dlp fallback with TV/Mobile/Android client spoofing
     ydl_opts = get_base_ydl_opts()
     ydl_opts.update({
         'skip_download': True,
@@ -524,10 +586,6 @@ def api_fetch(request):
     if ffmpeg_path:
         ydl_opts['ffmpeg_location'] = ffmpeg_path
 
-    info = None
-    last_exception = None
-
-    # Multi-client fallback chain to defeat YouTube PO Token / Bot Challenge
     client_configs = [
         ['tv', 'mweb'],
         ['ios', 'android'],
@@ -758,32 +816,83 @@ def run_download_task(task_id, download_data):
                 'progress_hooks': [progress_hook],
             })
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([download_target])
-    except Exception as e:
-        if download_target != url:
-            try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([url])
-            except Exception as e2:
+    # Try downloading via Invidious / Piped API direct video stream fallback if YouTube
+    direct_stream_downloaded = False
+    if platform == 'YouTube':
+        m_id = re.search(r'(?:v=|\/|youtu\.be\/)([a-zA-Z0-9_-]{11})', url)
+        video_id = m_id.group(1) if m_id else None
+        if video_id:
+            invidious_instances = [
+                'https://inv.verified.human.kiwi',
+                'https://invidious.nerdvpn.de',
+                'https://invidious.flokinet.to',
+                'https://vid.puffyan.us',
+            ]
+            for inst in invidious_instances:
+                try:
+                    resp = requests.get(f"{inst}/api/v1/videos/{video_id}", timeout=5)
+                    if resp.status_code == 200:
+                        inv_data = resp.json()
+                        format_streams = inv_data.get('formatStreams', [])
+                        if format_streams:
+                            # Select matching stream
+                            stream_url = format_streams[-1].get('url')
+                            if stream_url:
+                                stream_resp = requests.get(stream_url, stream=True, timeout=15)
+                                if stream_resp.status_code == 200:
+                                    ext = '.mp3' if format_type == 'mp3' else '.mp4'
+                                    out_file = os.path.join(temp_dir, f"downloaded_media{ext}")
+                                    total_len = int(stream_resp.headers.get('content-length', 0))
+                                    downloaded = 0
+                                    with open(out_file, 'wb') as f:
+                                        for chunk in stream_resp.iter_content(chunk_size=1024 * 64):
+                                            if chunk:
+                                                f.write(chunk)
+                                                downloaded += len(chunk)
+                                                if total_len > 0:
+                                                    pct = min(99.0, round((downloaded / total_len) * 100, 1))
+                                                else:
+                                                    pct = 50.0
+                                                with TASKS_LOCK:
+                                                    if task_id in PROGRESS_TASKS:
+                                                        PROGRESS_TASKS[task_id].update({
+                                                            'status': 'downloading',
+                                                            'downloaded_bytes': downloaded,
+                                                            'total_bytes': total_len,
+                                                            'percent': pct,
+                                                        })
+                                    direct_stream_downloaded = True
+                                    break
+                except Exception:
+                    pass
+
+    if not direct_stream_downloaded:
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([download_target])
+        except Exception as e:
+            if download_target != url:
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([url])
+                except Exception as e2:
+                    with TASKS_LOCK:
+                        if task_id in PROGRESS_TASKS:
+                            PROGRESS_TASKS[task_id].update({
+                                'status': 'error',
+                                'error': f'Download failed: {str(e2)[:120]}'
+                            })
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    return
+            else:
                 with TASKS_LOCK:
                     if task_id in PROGRESS_TASKS:
                         PROGRESS_TASKS[task_id].update({
                             'status': 'error',
-                            'error': f'Download failed: {str(e2)[:120]}'
+                            'error': f'Download failed: {str(e)[:120]}'
                         })
                 shutil.rmtree(temp_dir, ignore_errors=True)
                 return
-        else:
-            with TASKS_LOCK:
-                if task_id in PROGRESS_TASKS:
-                    PROGRESS_TASKS[task_id].update({
-                        'status': 'error',
-                        'error': f'Download failed: {str(e)[:120]}'
-                    })
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            return
 
     all_files = glob.glob(os.path.join(temp_dir, '*'))
     completed_files = [f for f in all_files if not f.endswith(('.part', '.ytdl', '.temp', '.jpg', '.png', '.webp', '.json'))]
