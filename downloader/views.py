@@ -34,8 +34,8 @@ def get_ffmpeg_path():
 def get_base_ydl_opts():
     """Returns resilient yt-dlp options bypassing YouTube bot detection and IP challenges."""
     browser_headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
         'Sec-Fetch-Mode': 'navigate',
     }
@@ -45,20 +45,27 @@ def get_base_ydl_opts():
         'no_warnings': True,
         'nocheckcertificate': True,
         'http_headers': browser_headers,
-        # iOS / Web player client fallback chain to bypass bot check
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios', 'android', 'web', 'mweb'],
-                'skip': ['hls', 'dash']
+                'player_client': ['tv', 'mweb', 'ios', 'android'],
+                'player_skip': ['webpage', 'configs'],
             }
         },
         'geo_bypass': True,
         'ignoreerrors': False,
     }
 
-    # Use cookies file if present
+    # 1. Try local browsers (Chrome, Edge, Firefox, Brave) cookies automatically
+    for browser_name in ['chrome', 'edge', 'firefox', 'brave', 'opera']:
+        try:
+            opts['cookiesfrombrowser'] = (browser_name,)
+            break
+        except Exception:
+            pass
+
+    # 2. Use cookies.txt file if present
     cookie_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
-    if os.path.exists(cookie_file):
+    if os.path.exists(cookie_file) and os.path.getsize(cookie_file) > 50:
         opts['cookiefile'] = cookie_file
 
     return opts
@@ -524,11 +531,34 @@ def api_fetch(request):
     if ffmpeg_path:
         ydl_opts['ffmpeg_location'] = ffmpeg_path
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-    except Exception as e:
-        err_msg = str(e)
+    info = None
+    last_exception = None
+
+    # Multi-client fallback chain to defeat YouTube PO Token / Bot Challenge
+    client_configs = [
+        ['tv', 'mweb'],
+        ['ios', 'android'],
+        ['web_creator', 'android_creator'],
+        ['mweb'],
+    ]
+
+    for clients in client_configs:
+        ydl_opts['extractor_args'] = {
+            'youtube': {
+                'player_client': clients,
+                'player_skip': ['webpage', 'configs'],
+            }
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                if info:
+                    break
+        except Exception as e:
+            last_exception = e
+
+    if not info and last_exception:
+        err_msg = str(last_exception)
         if "is not a valid URL" in err_msg or "Unsupported URL" in err_msg:
             return JsonResponse({'error': 'Invalid link provided.'}, status=400)
         return JsonResponse({'error': f'Could not fetch video info: {err_msg[:120]}'}, status=400)
